@@ -30,10 +30,22 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
         onNewMessage(newMessage);
       }
 
+      // Save to localStorage
+      const storageKey = `messages_${contactId}`;
+      const storedMessages = localStorage.getItem(storageKey);
+      const messages = storedMessages ? JSON.parse(storedMessages) : [];
+      messages.push(newMessage);
+      localStorage.setItem(storageKey, JSON.stringify(messages));
+
       setMessage('');
 
-      // Send to server in background
-      await apiService.sendTextMessage(contactId, message);
+      // Send to server in background (optional, for real integration later)
+      try {
+        await apiService.sendTextMessage(contactId, message);
+      } catch (err) {
+        console.warn('Backend send failed, but message saved locally:', err);
+      }
+
       onMessageSent();
       textInputRef.current?.focus();
     } catch (error) {
