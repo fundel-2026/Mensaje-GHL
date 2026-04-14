@@ -6,7 +6,7 @@ import { apiService } from '../services/api';
 
 export default function MessageInput({ contactId, onMessageSent, onNewMessage }) {
   const [message, setMessage] = useState('');
-  const [mode, setMode] = useState('text'); // 'text', 'audio', 'image'
+  const [mode, setMode] = useState('text');
   const [sending, setSending] = useState(false);
   const textInputRef = useRef(null);
 
@@ -16,8 +16,6 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
 
     try {
       setSending(true);
-
-      // Create message object
       const newMessage = {
         id: Date.now().toString(),
         body: message,
@@ -25,12 +23,10 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
         dateAdded: new Date().toISOString()
       };
 
-      // Show message immediately (optimistic update)
       if (onNewMessage) {
         onNewMessage(newMessage);
       }
 
-      // Save to localStorage
       const storageKey = `messages_${contactId}`;
       const storedMessages = localStorage.getItem(storageKey);
       const messages = storedMessages ? JSON.parse(storedMessages) : [];
@@ -38,14 +34,6 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
       localStorage.setItem(storageKey, JSON.stringify(messages));
 
       setMessage('');
-
-      // Send to server in background (optional, for real integration later)
-      try {
-        await apiService.sendTextMessage(contactId, message);
-      } catch (err) {
-        console.warn('Backend send failed, but message saved locally:', err);
-      }
-
       onMessageSent();
       textInputRef.current?.focus();
     } catch (error) {
@@ -59,8 +47,6 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
   const handleSendImage = async (file, caption) => {
     try {
       setSending(true);
-
-      // Read image as base64
       const reader = new FileReader();
       reader.onload = (e) => {
         const newMessage = {
@@ -75,12 +61,10 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
           }]
         };
 
-        // Show message immediately
         if (onNewMessage) {
           onNewMessage(newMessage);
         }
 
-        // Save to localStorage
         const storageKey = `messages_${contactId}`;
         const storedMessages = localStorage.getItem(storageKey);
         const messages = storedMessages ? JSON.parse(storedMessages) : [];
@@ -89,12 +73,12 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
 
         setMode('text');
         onMessageSent();
+        setSending(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
       console.error('Error sending image:', error);
       alert('Error al enviar imagen');
-    } finally {
       setSending(false);
     }
   };
@@ -102,8 +86,6 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
   const handleSendAudio = async (file) => {
     try {
       setSending(true);
-
-      // Read audio as base64
       const reader = new FileReader();
       reader.onload = (e) => {
         const newMessage = {
@@ -118,12 +100,10 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
           }]
         };
 
-        // Show message immediately
         if (onNewMessage) {
           onNewMessage(newMessage);
         }
 
-        // Save to localStorage
         const storageKey = `messages_${contactId}`;
         const storedMessages = localStorage.getItem(storageKey);
         const messages = storedMessages ? JSON.parse(storedMessages) : [];
@@ -132,12 +112,12 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
 
         setMode('text');
         onMessageSent();
+        setSending(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
       console.error('Error sending audio:', error);
       alert('Error al enviar audio');
-    } finally {
       setSending(false);
     }
   };
