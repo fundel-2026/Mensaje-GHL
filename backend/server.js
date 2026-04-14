@@ -4,8 +4,16 @@ import cors from 'cors';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+console.log(`Starting server on PORT: ${PORT}`);
+
 app.use(cors());
 app.use(express.json());
+
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
 
 // Demo data inline
 const mockConversations = {
@@ -36,47 +44,95 @@ const mockMessages = {
 
 // Health
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  console.log('Responding to health check');
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Get conversations
 app.get('/api/conversations', (req, res) => {
-  console.log('GET /api/conversations');
-  res.json(mockConversations);
+  console.log('Responding with conversations');
+  try {
+    res.json(mockConversations);
+  } catch (e) {
+    console.error('Error in conversations route:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Get messages
 app.get('/api/messages/:contactId', (req, res) => {
   const { contactId } = req.params;
-  console.log('GET /api/messages/:' + contactId);
-  const messages = mockMessages[contactId] || { data: [] };
-  res.json(messages);
+  console.log('Responding with messages for contact:', contactId);
+  try {
+    const messages = mockMessages[contactId] || { data: [] };
+    res.json(messages);
+  } catch (e) {
+    console.error('Error in messages route:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Send text
 app.post('/api/messages/send-text', (req, res) => {
-  console.log('POST /api/messages/send-text');
-  res.json({ success: true, id: Date.now().toString() });
+  console.log('Sending text message');
+  try {
+    res.json({ success: true, id: Date.now().toString() });
+  } catch (e) {
+    console.error('Error in send-text route:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Send media
 app.post('/api/messages/send-media', (req, res) => {
-  console.log('POST /api/messages/send-media');
-  res.json({ success: true, id: Date.now().toString() });
+  console.log('Sending media');
+  try {
+    res.json({ success: true, id: Date.now().toString() });
+  } catch (e) {
+    console.error('Error in send-media route:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Quick replies
 app.get('/api/quick-replies', (req, res) => {
-  console.log('GET /api/quick-replies');
-  res.json([]);
+  console.log('Responding with quick replies');
+  try {
+    res.json([]);
+  } catch (e) {
+    console.error('Error in quick-replies route:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.post('/api/quick-replies', (req, res) => {
-  console.log('POST /api/quick-replies');
-  res.json({ id: Date.now().toString(), ...req.body });
+  console.log('Creating quick reply');
+  try {
+    res.json({ id: Date.now().toString(), ...req.body });
+  } catch (e) {
+    console.error('Error in create quick-reply route:', e);
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// Start
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+// 404
+app.use((req, res) => {
+  console.log('404 for:', req.method, req.path);
+  res.status(404).json({ error: 'Not found' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: err.message });
+});
+
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ CORS enabled`);
+  console.log(`✅ Ready to accept requests`);
+});
+
+server.on('error', (err) => {
+  console.error('Server error:', err);
 });
