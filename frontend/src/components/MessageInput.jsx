@@ -125,7 +125,8 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
         </div>
 
         <div className="flex gap-2 items-center">
-          <button
+          {/* Image and Audio temporarily disabled - coming soon with GHL integration */}
+          {/* <button
             type="button"
             onClick={() => setMode('image')}
             className="p-2 text-lg hover:bg-gray-100 rounded-lg transition"
@@ -143,7 +144,7 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
             disabled={sending}
           >
             🎤
-          </button>
+          </button> */}
 
           <QuickReplies
             onSelectReply={handleQuickReplySelect}
