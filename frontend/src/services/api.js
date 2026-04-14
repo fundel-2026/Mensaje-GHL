@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://mensaje-ghl-production.up.railway.app') + '/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://69dec43ddd6e26119282a1d.mockapi.io/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE,
