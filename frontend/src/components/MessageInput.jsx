@@ -59,11 +59,38 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
   const handleSendImage = async (file, caption) => {
     try {
       setSending(true);
-      const messageBody = caption || '(Imagen compartida)';
-      // First send the media
-      await apiService.sendMediaMessage(contactId, file, messageBody);
-      setMode('text');
-      onMessageSent();
+
+      // Read image as base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newMessage = {
+          id: Date.now().toString(),
+          body: caption || '(Imagen compartida)',
+          direction: 'outbound',
+          dateAdded: new Date().toISOString(),
+          attachments: [{
+            type: 'image',
+            url: e.target.result,
+            name: file.name
+          }]
+        };
+
+        // Show message immediately
+        if (onNewMessage) {
+          onNewMessage(newMessage);
+        }
+
+        // Save to localStorage
+        const storageKey = `messages_${contactId}`;
+        const storedMessages = localStorage.getItem(storageKey);
+        const messages = storedMessages ? JSON.parse(storedMessages) : [];
+        messages.push(newMessage);
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+
+        setMode('text');
+        onMessageSent();
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
       console.error('Error sending image:', error);
       alert('Error al enviar imagen');
@@ -75,9 +102,38 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
   const handleSendAudio = async (file) => {
     try {
       setSending(true);
-      await apiService.sendMediaMessage(contactId, file, '(Audio)');
-      setMode('text');
-      onMessageSent();
+
+      // Read audio as base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newMessage = {
+          id: Date.now().toString(),
+          body: '(Audio)',
+          direction: 'outbound',
+          dateAdded: new Date().toISOString(),
+          attachments: [{
+            type: 'audio',
+            url: e.target.result,
+            name: 'audio.webm'
+          }]
+        };
+
+        // Show message immediately
+        if (onNewMessage) {
+          onNewMessage(newMessage);
+        }
+
+        // Save to localStorage
+        const storageKey = `messages_${contactId}`;
+        const storedMessages = localStorage.getItem(storageKey);
+        const messages = storedMessages ? JSON.parse(storedMessages) : [];
+        messages.push(newMessage);
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+
+        setMode('text');
+        onMessageSent();
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
       console.error('Error sending audio:', error);
       alert('Error al enviar audio');
@@ -125,8 +181,7 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
         </div>
 
         <div className="flex gap-2 items-center">
-          {/* Image and Audio temporarily disabled - coming soon with GHL integration */}
-          {/* <button
+          <button
             type="button"
             onClick={() => setMode('image')}
             className="p-2 text-lg hover:bg-gray-100 rounded-lg transition"
@@ -144,7 +199,7 @@ export default function MessageInput({ contactId, onMessageSent, onNewMessage })
             disabled={sending}
           >
             🎤
-          </button> */}
+          </button>
 
           <QuickReplies
             onSelectReply={handleQuickReplySelect}
