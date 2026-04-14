@@ -4,7 +4,7 @@ import ImageUpload from './ImageUpload';
 import QuickReplies from './QuickReplies';
 import { apiService } from '../services/api';
 
-export default function MessageInput({ contactId, onMessageSent }) {
+export default function MessageInput({ contactId, onMessageSent, onNewMessage }) {
   const [message, setMessage] = useState('');
   const [mode, setMode] = useState('text'); // 'text', 'audio', 'image'
   const [sending, setSending] = useState(false);
@@ -16,8 +16,24 @@ export default function MessageInput({ contactId, onMessageSent }) {
 
     try {
       setSending(true);
-      await apiService.sendTextMessage(contactId, message);
+
+      // Create message object
+      const newMessage = {
+        id: Date.now().toString(),
+        body: message,
+        direction: 'outbound',
+        dateAdded: new Date().toISOString()
+      };
+
+      // Show message immediately (optimistic update)
+      if (onNewMessage) {
+        onNewMessage(newMessage);
+      }
+
       setMessage('');
+
+      // Send to server in background
+      await apiService.sendTextMessage(contactId, message);
       onMessageSent();
       textInputRef.current?.focus();
     } catch (error) {

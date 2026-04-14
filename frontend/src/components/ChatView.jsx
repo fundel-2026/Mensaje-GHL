@@ -160,7 +160,17 @@ export default function ChatView({ contactId, contact, onRefresh }) {
       </div>
 
       {/* Message Input */}
-      <MessageInput contactId={contactId} onMessageSent={loadMessages} />
+      <MessageInput
+        contactId={contactId}
+        onMessageSent={() => {
+          // Add message to UI immediately, then load from server
+          loadMessages();
+        }}
+        onNewMessage={(newMessage) => {
+          // Optimistic update: show message immediately
+          setMessages(prev => [...prev, newMessage]);
+        }}
+      />
     </div>
   );
 }
