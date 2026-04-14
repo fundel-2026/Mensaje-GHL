@@ -74,9 +74,23 @@ app.get('/api/messages/:contactId', (req, res) => {
 
 // Send text
 app.post('/api/messages/send-text', (req, res) => {
-  console.log('Sending text message');
+  const { contactId, message } = req.body;
+  console.log('Sending text message to contact:', contactId, 'Message:', message);
   try {
-    res.json({ success: true, id: Date.now().toString() });
+    const newMessage = {
+      id: Date.now().toString(),
+      body: message,
+      direction: 'outbound',
+      dateAdded: new Date().toISOString()
+    };
+
+    // Add message to mockMessages
+    if (!mockMessages[contactId]) {
+      mockMessages[contactId] = { data: [] };
+    }
+    mockMessages[contactId].data.push(newMessage);
+
+    res.json({ success: true, id: newMessage.id, message: newMessage });
   } catch (e) {
     console.error('Error in send-text route:', e);
     res.status(500).json({ error: e.message });
