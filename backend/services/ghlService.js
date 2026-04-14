@@ -8,7 +8,7 @@ const GHL_API_KEY = process.env.GHL_API_KEY;
 const LOCATION_ID = process.env.GHL_LOCATION_ID;
 
 if (!GHL_API_KEY || !LOCATION_ID) {
-  console.warn('⚠️ GHL_API_KEY or GHL_LOCATION_ID not found. GHL API features will be disabled.');
+  console.warn('⚠️ GHL_API_KEY or GHL_LOCATION_ID not found. Using demo mode.');
 }
 
 const ghlClient = axios.create({
