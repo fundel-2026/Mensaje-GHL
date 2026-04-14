@@ -10,8 +10,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Check if we're in demo mode
-export const IS_DEMO_MODE = !process.env.GHL_API_KEY || !process.env.GHL_LOCATION_ID;
+// Always use demo mode for now
+export const IS_DEMO_MODE = true;
 
 // Middleware
 app.use(cors({
