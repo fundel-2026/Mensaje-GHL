@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm install *)",
       "Bash(node server.js)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(rm -rf docs)",
+      "Bash(cp -r frontend/dist docs)",
+      "Bash(gh repo *)"
     ]
   }
 }
