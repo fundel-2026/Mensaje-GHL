@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,33 +26,27 @@ app.use((req, res, next) => {
 
 // Helper function to call GHL API
 async function callGhlApi(endpoint, method = 'GET', body = null) {
-  const headers = {
-    'Authorization': `Bearer ${GHL_API_KEY}`,
-    'Content-Type': 'application/json'
-  };
-
-  const options = {
-    method,
-    headers
-  };
-
-  if (body) {
-    options.body = JSON.stringify(body);
-  }
-
   try {
-    const response = await fetch(`${GHL_API_BASE}${endpoint}`, options);
-    const data = await response.json();
+    const config = {
+      method,
+      url: `${GHL_API_BASE}${endpoint}`,
+      headers: {
+        'Authorization': `Bearer ${GHL_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
 
-    if (!response.ok) {
-      console.error('GHL API Error:', data);
-      throw new Error(data.message || 'GHL API Error');
+    if (body) {
+      config.data = body;
     }
 
-    return data;
+    console.log(`GHL API Call: ${method} ${endpoint}`);
+    const response = await axios(config);
+    console.log(`GHL API Success: ${endpoint}`);
+    return response.data;
   } catch (error) {
-    console.error('GHL API Call Error:', error);
-    throw error;
+    console.error(`GHL API Error for ${endpoint}:`, error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || error.message);
   }
 }
 
