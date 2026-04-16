@@ -27,21 +27,27 @@ export default function ChatView({ contactId, contact, onRefresh }) {
   const loadMessages = async () => {
     try {
       setLoading(true);
-      // First try to load from localStorage
       const storageKey = `messages_${contactId}`;
-      const storedMessages = localStorage.getItem(storageKey);
 
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
+      // Try API first for fresh data
+      try {
+        const data = await apiService.getMessages(contactId);
+        const messageList = data.data || data.messages || data || [];
+        setMessages(messageList);
+        // Save to localStorage
+        localStorage.setItem(storageKey, JSON.stringify(messageList));
         return;
+      } catch (apiError) {
+        console.warn('API load failed, trying localStorage:', apiError);
       }
 
-      // Fallback to API
-      const data = await apiService.getMessages(contactId);
-      const messageList = data.data || data.messages || data || [];
-      setMessages(messageList);
-      // Save to localStorage
-      localStorage.setItem(storageKey, JSON.stringify(messageList));
+      // Fallback to localStorage if API fails
+      const storedMessages = localStorage.getItem(storageKey);
+      if (storedMessages) {
+        setMessages(JSON.parse(storedMessages));
+      } else {
+        setMessages([]);
+      }
     } catch (error) {
       console.error('Error loading messages:', error);
     } finally {

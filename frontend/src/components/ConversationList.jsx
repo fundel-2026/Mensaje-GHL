@@ -18,9 +18,11 @@ export default function ConversationList({ onSelectContact, selectedContactId })
       setLoading(true);
       const data = await apiService.getConversations();
       const contactList = data.contacts || data.data || data || [];
+      // Always update from API, don't use cache for conversations
       setConversations(contactList);
     } catch (error) {
       console.error('Error loading conversations:', error);
+      setConversations([]); // Clear if error
     } finally {
       setLoading(false);
     }
